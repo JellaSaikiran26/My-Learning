@@ -3,33 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Personal Wealth Planner</title>
+<title>Smart Savings Planner</title>
 
 <style>
 body{
-    font-family: Arial, sans-serif;
+    font-family:Arial,sans-serif;
     background:#f4f6f8;
-    margin:0;
     padding:20px;
 }
+
 .container{
     max-width:500px;
     margin:auto;
     background:white;
     padding:20px;
     border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    box-shadow:0px 2px 10px rgba(0,0,0,0.15);
 }
+
 h1{
     text-align:center;
 }
-input{
+
+input,select{
     width:100%;
     padding:10px;
     margin-top:5px;
     margin-bottom:15px;
     box-sizing:border-box;
 }
+
 button{
     width:100%;
     padding:12px;
@@ -38,7 +41,9 @@ button{
     border:none;
     border-radius:5px;
     font-size:16px;
+    cursor:pointer;
 }
+
 .result{
     margin-top:20px;
     padding:15px;
@@ -52,27 +57,25 @@ button{
 
 <div class="container">
 
-<h1>💰 Wealth Planner</h1>
+<h1>💰 Smart Savings Planner</h1>
 
 <label>Current Account Balance (₹)</label>
 <input type="number" id="balance">
 
-<label>Monthly Salary (₹)</label>
-<input type="number" id="salary">
+<label>Amount You Want To Save (₹)</label>
+<input type="number" id="saveAmount">
 
-<label>Monthly Expenses (₹)</label>
-<input type="number" id="expenses">
+<label>Risk Profile</label>
+<select id="risk">
+<option value="conservative">Conservative</option>
+<option value="moderate">Moderate</option>
+<option value="aggressive">Aggressive</option>
+</select>
 
-<label>Savings Goal (₹)</label>
-<input type="number" id="goal">
-
-<label>Years to Goal</label>
-<input type="number" id="years">
-
-<button onclick="calculate()">Calculate Plan</button>
+<button onclick="calculate()">Get Recommendation</button>
 
 <div class="result" id="output">
-Enter details and click Calculate.
+Enter details and click Get Recommendation.
 </div>
 
 </div>
@@ -82,55 +85,74 @@ Enter details and click Calculate.
 function calculate(){
 
 let balance = Number(document.getElementById("balance").value);
-let salary = Number(document.getElementById("salary").value);
-let expenses = Number(document.getElementById("expenses").value);
-let goal = Number(document.getElementById("goal").value);
-let years = Number(document.getElementById("years").value);
+let saveAmount = Number(document.getElementById("saveAmount").value);
+let risk = document.getElementById("risk").value;
 
-let monthlySavings = salary - expenses;
-
-let remainingGoal = goal - balance;
-
-let months = years * 12;
-
-let requiredMonthly = Math.ceil(remainingGoal / months);
-
-let suggestion = "";
-
-if(monthlySavings >= requiredMonthly){
-    suggestion = "✅ You are on track to reach your goal.";
-}else{
-    suggestion = "⚠️ Increase savings or extend your timeline.";
+if(saveAmount > balance){
+    document.getElementById("output").innerHTML =
+    "❌ Savings amount cannot be greater than account balance.";
+    return;
 }
 
-let emergencyFund = expenses * 6;
+let sip = 0;
+let emergency = 0;
+let fd = 0;
+let gold = 0;
 
-let equity = Math.round(monthlySavings * 0.60);
-let debt = Math.round(monthlySavings * 0.25);
-let gold = Math.round(monthlySavings * 0.10);
-let cash = Math.round(monthlySavings * 0.05);
+if(risk === "conservative"){
+
+    fd = Math.round(saveAmount * 0.60);
+    emergency = Math.round(saveAmount * 0.25);
+    gold = Math.round(saveAmount * 0.15);
+
+}
+
+if(risk === "moderate"){
+
+    sip = Math.round(saveAmount * 0.60);
+    emergency = Math.round(saveAmount * 0.20);
+    fd = Math.round(saveAmount * 0.20);
+
+}
+
+if(risk === "aggressive"){
+
+    sip = Math.round(saveAmount * 0.80);
+    emergency = Math.round(saveAmount * 0.10);
+    gold = Math.round(saveAmount * 0.10);
+
+}
+
+let remainingBalance = balance - saveAmount;
 
 document.getElementById("output").innerHTML = `
-<h3>Results</h3>
 
-<p><b>Monthly Savings:</b> ₹${monthlySavings.toLocaleString()}</p>
+<h2>📊 Recommendation</h2>
 
-<p><b>Required Monthly Savings:</b> ₹${requiredMonthly.toLocaleString()}</p>
+<p><b>Current Balance:</b> ₹${balance.toLocaleString()}</p>
 
-<p><b>Emergency Fund Target:</b> ₹${emergencyFund.toLocaleString()}</p>
+<p><b>Amount To Save:</b> ₹${saveAmount.toLocaleString()}</p>
 
-<p>${suggestion}</p>
+<p><b>Remaining Spendable Money:</b> ₹${remainingBalance.toLocaleString()}</p>
+
+<hr>
 
 <h3>Suggested Allocation</h3>
 
-<p>📈 Equity Mutual Funds: ₹${equity.toLocaleString()}</p>
+${sip > 0 ? `<p>📈 SIP / Mutual Funds: ₹${sip.toLocaleString()}</p>` : ""}
 
-<p>🏦 Debt Funds/FD: ₹${debt.toLocaleString()}</p>
+${fd > 0 ? `<p>🏦 FD / RD: ₹${fd.toLocaleString()}</p>` : ""}
 
-<p>🥇 Gold ETF/SGB: ₹${gold.toLocaleString()}</p>
+${emergency > 0 ? `<p>🛡 Emergency Fund: ₹${emergency.toLocaleString()}</p>` : ""}
 
-<p>💵 Cash Reserve: ₹${cash.toLocaleString()}</p>
+${gold > 0 ? `<p>🥇 Gold ETF / SGB: ₹${gold.toLocaleString()}</p>` : ""}
+
+<hr>
+
+<p><b>Risk Profile:</b> ${risk.toUpperCase()}</p>
+
 `;
+
 }
 
 </script>
